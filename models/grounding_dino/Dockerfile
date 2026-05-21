@@ -39,15 +39,15 @@ ENV PYTHONPATH="/home/${USERNAME}/app:${PYTHONPATH}"
 
 # Install PyTorch using uv based on CPU_ONLY argument
 RUN if [ "$CPU_ONLY" = "1" ] ; then \
-        uv pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu ; \
+        uv pip install --no-cache-dir "torch==2.1.2" "torchvision==0.16.2" "torchaudio==2.1.2" --index-url https://download.pytorch.org/whl/cpu ; \
     else \
-        uv pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 ; \
+        uv pip install --no-cache-dir "torch==2.1.2" "torchvision==0.16.2" "torchaudio==2.1.2" --index-url https://download.pytorch.org/whl/cu118 ; \
     fi
 
 # Clone and install GroundingDINO
 ENV CUDA_HOME=/usr/local/cuda
-RUN git clone --depth 1 https://github.com/IDEA-Research/GroundingDINO.git && \
-    cd GroundingDINO && \
+RUN git clone --depth 1 https://github.com/IDEA-Research/GroundingDINO.git
+RUN cd GroundingDINO && \
     if [ "$CPU_ONLY" = "1" ] ; then export GROUNDINGDINO_BUILD_CUDA=0 ; fi && \
     uv pip install --no-cache-dir --no-build-isolation -e .
 
