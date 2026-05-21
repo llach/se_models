@@ -32,8 +32,9 @@ RUN groupadd -g ${GID} -o ${USERNAME} && \
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}/app
 
-# Add path and pythonpath
-ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"
+# Create virtual environment and activate it by adding to PATH
+RUN uv venv /home/${USERNAME}/venv
+ENV PATH="/home/${USERNAME}/venv/bin:${PATH}"
 ENV PYTHONPATH="/home/${USERNAME}/app:${PYTHONPATH}"
 
 # Install PyTorch using uv based on CPU_ONLY argument
@@ -48,10 +49,10 @@ ENV CUDA_HOME=/usr/local/cuda
 RUN git clone --depth 1 https://github.com/IDEA-Research/GroundingDINO.git && \
     cd GroundingDINO && \
     if [ "$CPU_ONLY" = "1" ] ; then export GROUNDINGDINO_BUILD_CUDA=0 ; fi && \
-    uv pip install --user --no-cache-dir -e .
+    uv pip install --no-cache-dir -e .
 
 # Install FastAPI and server dependencies using uv
-RUN uv pip install --user --no-cache-dir fastapi uvicorn pydantic python-multipart opencv-python-headless "transformers<4.37.0"
+RUN uv pip install --no-cache-dir fastapi uvicorn pydantic python-multipart opencv-python-headless "transformers<4.37.0"
 
 # Copy source/types and server code
 COPY --chown=${USERNAME}:${GID} src/ /home/${USERNAME}/app/src/

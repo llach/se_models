@@ -31,25 +31,26 @@ RUN groupadd -g ${GID} -o ${USERNAME} && \
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}/app
 
-# Add path and pythonpath
-ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"
+# Create virtual environment and activate it by adding to PATH
+RUN uv venv /home/${USERNAME}/venv
+ENV PATH="/home/${USERNAME}/venv/bin:${PATH}"
 ENV PYTHONPATH="/home/${USERNAME}/app:${PYTHONPATH}"
 
 # Install python dependencies based on CPU_ONLY argument using uv
 RUN if [ "$CPU_ONLY" = "1" ] ; then \
-        uv pip install --user --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu ; \
+        uv pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu ; \
     else \
-        uv pip install --user --no-cache-dir torch torchvision torchaudio ; \
+        uv pip install --no-cache-dir torch torchvision torchaudio ; \
     fi
 
 # Clone SAM2 and install using uv
 ENV CUDA_HOME=/usr/local/cuda
 RUN git clone --depth 1 https://github.com/facebookresearch/segment-anything-2.git && \
     cd segment-anything-2 && \
-    uv pip install --user --no-cache-dir .
+    uv pip install --no-cache-dir .
 
 # Install FastAPI and other reqs using uv
-RUN uv pip install --user --no-cache-dir fastapi uvicorn pydantic python-multipart opencv-python-headless
+RUN uv pip install --no-cache-dir fastapi uvicorn pydantic python-multipart opencv-python-headless
 
 # Download weights
 RUN mkdir -p /home/${USERNAME}/app/weights && \

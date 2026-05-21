@@ -59,7 +59,7 @@ Default `.env` settings:
 ```env
 GROUNDING_DINO_PORT=8000
 SAM2_PORT=8001
-MACOS=1  # Set to 1 for CPU-only execution on macOS, 0 for Nvidia GPU on Linux
+CPU_ONLY=1  # Set to 1 for CPU-only execution, 0 for Nvidia GPU on Linux
 ```
 
 ---
