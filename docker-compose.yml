@@ -7,7 +7,7 @@ services:
       dockerfile: models/grounding_dino/Dockerfile
       args:
         BASE_IMAGE: nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
-        MACOS: ${MACOS:-0}
+        CPU_ONLY: ${CPU_ONLY:-0}
     image: grounding_dino:latest
     container_name: grounding_dino
     ports:
@@ -33,7 +33,7 @@ services:
       dockerfile: models/sam2/Dockerfile
       args:
         BASE_IMAGE: nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
-        MACOS: ${MACOS:-0}
+        CPU_ONLY: ${CPU_ONLY:-0}
     image: sam2:latest
     container_name: sam2
     ports:
