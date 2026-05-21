@@ -49,7 +49,7 @@ ENV CUDA_HOME=/usr/local/cuda
 RUN git clone --depth 1 https://github.com/IDEA-Research/GroundingDINO.git && \
     cd GroundingDINO && \
     if [ "$CPU_ONLY" = "1" ] ; then export GROUNDINGDINO_BUILD_CUDA=0 ; fi && \
-    uv pip install --no-cache-dir -e .
+    uv pip install --no-cache-dir --no-build-isolation -e .
 
 # Install FastAPI and server dependencies using uv
 RUN uv pip install --no-cache-dir fastapi uvicorn pydantic python-multipart opencv-python-headless "transformers<4.37.0"
