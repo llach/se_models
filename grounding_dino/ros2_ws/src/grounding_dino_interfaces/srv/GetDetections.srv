@@ -1,0 +1,8 @@
+sensor_msgs/Image image
+string prompt
+float32 box_threshold 0.35
+float32 text_threshold 0.25
+---
+bool success
+string error_message
+Detection[] detections

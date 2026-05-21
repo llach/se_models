@@ -1,0 +1,6 @@
+sensor_msgs/Image image
+string bboxes_json
+---
+bool success
+string error_message
+Segmentation[] segmentations
