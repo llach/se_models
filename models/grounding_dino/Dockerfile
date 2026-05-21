@@ -41,7 +41,7 @@ ENV PYTHONPATH="/home/${USERNAME}/app:${PYTHONPATH}"
 RUN if [ "$CPU_ONLY" = "1" ] ; then \
         uv pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu ; \
     else \
-        uv pip install --no-cache-dir torch torchvision torchaudio ; \
+        uv pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 ; \
     fi
 
 # Clone and install GroundingDINO
