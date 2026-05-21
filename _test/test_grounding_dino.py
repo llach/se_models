@@ -1,4 +1,3 @@
-import requests
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,15 +5,32 @@ import sys
 import os
 import time
 
+# Support importing from the project root
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
+# Load .env variables if present to get local port mapping
+if os.path.exists(os.path.join(ROOT_DIR, ".env")):
+    with open(os.path.join(ROOT_DIR, ".env")) as f:
+        for line in f:
+            if line.strip() and not line.startswith('#'):
+                key, val = line.strip().split('=', 1)
+                os.environ[key] = val
+
+from src.grounding_dino_client import GroundingDinoClient
+
 # ==========================================
 # PARAMETERS
 # ==========================================
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-IMAGE_PATH = os.path.join(SCRIPT_DIR, "stack.png")  # Provide a valid path to an image
+IMAGE_PATH = os.path.join(SCRIPT_DIR, "stack.png")
 PROMPT = "clothing"
 BOX_THRESHOLD = 0.35
 TEXT_THRESHOLD = 0.25
-API_URL = "http://localhost:8000/predict_grounding_dino"
+
+PORT = os.getenv("GROUNDING_DINO_PORT", "8000")
+API_URL = f"http://localhost:{PORT}"
 # ==========================================
 
 def create_dummy_image():
@@ -29,27 +45,34 @@ def main():
         print(f"Creating a dummy image at {IMAGE_PATH} since it doesn't exist.")
         create_dummy_image()
 
-    print(f"Sending request to GroundingDINO API...")
+    print(f"Initializing GroundingDINO client at {API_URL}...")
+    try:
+        client = GroundingDinoClient(API_URL)
+    except Exception as e:
+        print(f"Failed to initialize client: {e}")
+        print("Ensure that the GroundingDINO server is running.")
+        sys.exit(1)
+
+    print(f"Sending request via GroundingDinoClient...")
     start_time = time.time()
     with open(IMAGE_PATH, "rb") as f:
-        files = {"image": f}
-        data = {
-            "prompt": PROMPT,
-            "box_threshold": BOX_THRESHOLD,
-            "text_threshold": TEXT_THRESHOLD
-        }
-        response = requests.post(API_URL, files=files, data=data)
+        image_bytes = f.read()
+        
+    try:
+        response = client.predict(
+            image_bytes=image_bytes,
+            prompt=PROMPT,
+            box_threshold=BOX_THRESHOLD,
+            text_threshold=TEXT_THRESHOLD
+        )
+    except Exception as e:
+        print(f"Prediction failed: {e}")
+        sys.exit(1)
+        
     end_time = time.time()
     print(f"Model prediction took {end_time - start_time:.3f} seconds.")
 
-    if response.status_code != 200:
-        print(f"Error: {response.status_code}")
-        print(response.text)
-        sys.exit(1)
-
-    result = response.json()
-    detections = result.get("detections", [])
-    
+    detections = response.detections
     print(f"Found {len(detections)} detections.")
 
     # Visualization
@@ -57,14 +80,14 @@ def main():
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     for det in detections:
-        bbox = det["bbox"]
-        label = det["label"]
-        conf = det["confidence"]
+        bbox = det.bbox
+        label = det.label
+        conf = det.confidence
 
-        x_min = int(bbox["x_min"])
-        y_min = int(bbox["y_min"])
-        x_max = int(bbox["x_max"])
-        y_max = int(bbox["y_max"])
+        x_min = int(bbox.x_min)
+        y_min = int(bbox.y_min)
+        x_max = int(bbox.x_max)
+        y_max = int(bbox.y_max)
 
         cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (255, 0, 0), 2)
         

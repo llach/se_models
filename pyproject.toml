@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "se_models"
+version = "0.1.0"
+description = "FastAPI servers and ROS2 client wrappers for GroundingDINO and SAM2"
+dependencies = [
+    "pydantic>=2.0.0",
+    "requests",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]

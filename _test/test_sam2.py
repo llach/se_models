@@ -1,4 +1,3 @@
-import requests
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,12 +7,28 @@ import json
 import base64
 import time
 
+# Support importing from the project root
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
+
+# Load .env variables if present to get local port mapping
+if os.path.exists(os.path.join(ROOT_DIR, ".env")):
+    with open(os.path.join(ROOT_DIR, ".env")) as f:
+        for line in f:
+            if line.strip() and not line.startswith('#'):
+                key, val = line.strip().split('=', 1)
+                os.environ[key] = val
+
+from src.sam2_client import Sam2Client
+
 # ==========================================
 # PARAMETERS
 # ==========================================
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-IMAGE_PATH = os.path.join(SCRIPT_DIR, "stack.png")  # Provide a valid path to an image
-API_URL = "http://localhost:8001/predict_sam2"
+IMAGE_PATH = os.path.join(SCRIPT_DIR, "stack.png")
+PORT = os.getenv("SAM2_PORT", "8001")
+API_URL = f"http://localhost:{PORT}"
 # Empty list means run automatic mask generation
 BBOXES = [] 
 # ==========================================
@@ -30,26 +45,33 @@ def main():
         print(f"Creating a dummy image at {IMAGE_PATH} since it doesn't exist.")
         create_dummy_image()
 
-    print(f"Sending request to SAM2 API (with {len(BBOXES)} bounding boxes)...")
+    print(f"Initializing SAM2 client at {API_URL}...")
+    try:
+        client = Sam2Client(API_URL)
+    except Exception as e:
+        print(f"Failed to initialize client: {e}")
+        print("Ensure that the SAM2 server is running.")
+        sys.exit(1)
+
+    print(f"Sending request via Sam2Client (with {len(BBOXES)} bounding boxes)...")
     
     start_time = time.time()
     with open(IMAGE_PATH, "rb") as f:
-        files = {"image": f}
-        data = {
-            "bboxes_json": json.dumps(BBOXES)
-        }
-        response = requests.post(API_URL, files=files, data=data)
+        image_bytes = f.read()
+        
+    try:
+        response = client.predict(
+            image_bytes=image_bytes,
+            bboxes_json=json.dumps(BBOXES)
+        )
+    except Exception as e:
+        print(f"Prediction failed: {e}")
+        sys.exit(1)
+        
     end_time = time.time()
     print(f"Model prediction took {end_time - start_time:.3f} seconds.")
 
-    if response.status_code != 200:
-        print(f"Error: {response.status_code}")
-        print(response.text)
-        sys.exit(1)
-
-    result = response.json()
-    segmentations = result.get("results", [])
-    
+    segmentations = response.results
     print(f"Found {len(segmentations)} segmentations.")
 
     # Visualization
@@ -65,8 +87,8 @@ def main():
     # Plot masks overlay
     overlay = img.copy()
     for seg in segmentations:
-        conf = seg["confidence"]
-        mask_b64 = seg["mask_base64"]
+        conf = seg.confidence
+        mask_b64 = seg.mask_base64
         
         # Decode base64 PNG mask
         mask_bytes = base64.b64decode(mask_b64)
