@@ -27,27 +27,27 @@ services:
               count: all
               capabilities: [gpu]
 
-  sam2:
-    build:
-      context: .
-      dockerfile: models/sam2/Dockerfile
-      args:
-        BASE_IMAGE: nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
-        CPU_ONLY: ${CPU_ONLY:-0}
-    image: sam2:latest
-    container_name: sam2
-    ports:
-      - "${SAM2_PORT:-8001}:8080"
-    environment:
-      - DISPLAY=${DISPLAY}
-    volumes:
-      - ~/shared:/shared
-      - /dev/shm:/dev/shm
-    privileged: true
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+  # sam2:
+  #   build:
+  #     context: .
+  #     dockerfile: models/sam2/Dockerfile
+  #     args:
+  #       BASE_IMAGE: nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+  #       CPU_ONLY: ${CPU_ONLY:-0}
+  #   image: sam2:latest
+  #   container_name: sam2
+  #   ports:
+  #     - "${SAM2_PORT:-8001}:8080"
+  #   environment:
+  #     - DISPLAY=${DISPLAY}
+  #   volumes:
+  #     - ~/shared:/shared
+  #     - /dev/shm:/dev/shm
+  #   privileged: true
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
