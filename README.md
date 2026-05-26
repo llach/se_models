@@ -14,14 +14,10 @@ se_models/
 ├── models/                    # Model-specific servers, configurations and Docker setup
 │   ├── grounding_dino/
 │   │   ├── Dockerfile         # Runs FastAPI server internally on port 8080
-│   │   ├── api.py             # FastAPI server endpoint definitions
-│   │   ├── build.sh           # Script to build GroundingDINO image with root context
-│   │   └── run.sh             # Script to run GroundingDINO container using .env ports
+│   │   └── api.py             # FastAPI server endpoint definitions
 │   └── sam2/
 │       ├── Dockerfile         # Runs FastAPI server internally on port 8080
-│       ├── api.py             # FastAPI server endpoint definitions
-│       ├── build.sh           # Script to build SAM2 image with root context
-│       └── run.sh             # Script to run SAM2 container using .env ports
+│       └── api.py             # FastAPI server endpoint definitions
 ├── src/                       # Common python client wrappers and types
 │   ├── types/                 # Shared Pydantic types for API schemas
 │   │   ├── grounding_dino.py
@@ -66,26 +62,14 @@ CPU_ONLY=1  # Set to 1 for CPU-only execution, 0 for Nvidia GPU on Linux
 
 ## 1. How to Build and Run Model Dockers
 
-### Option A: Using Docker Compose (Recommended)
-This spins up both model servers (FastAPI) at the same time:
+To spin up all model servers (FastAPI) at the same time using Docker Compose:
+
 ```bash
 # Build and start all model containers
 docker compose up --build
 
 # Start in background
 docker compose up -d
-```
-
-### Option B: Using Individual Scripts
-You can build and run individual model containers using the provided helper scripts:
-```bash
-# GroundingDINO
-./models/grounding_dino/build.sh
-./models/grounding_dino/run.sh
-
-# SAM2
-./models/sam2/build.sh
-./models/sam2/run.sh
 ```
 
 ---
@@ -171,8 +155,7 @@ Adding a new model to this project follows a structured process to keep the code
 ### Step 1: Create the Server Folder
 Create a folder under `models/` (e.g. `models/yolov8/`). Add:
 1. **`api.py`**: A FastAPI application. Define a `/health` endpoint returning `{"status": "healthy"}` and your prediction endpoints. Ensure it runs on port `8080`.
-2. **`Dockerfile`**: Configure system/CUDA libraries and installation. Ensure it copies `src/` to `/home/${USERNAME}/app/src/` and sets `PYTHONPATH="/home/${USERNAME}/app:${PYTHONPATH}"`.
-3. **`build.sh`** and **`run.sh`** scripts: Use the root of the repository as the docker build context so it has access to copy `src/`.
+2. **`Dockerfile`**: Configure system/CUDA libraries and installation. Ensure it copies `src/` to `/home/${USERNAME}/app/src/` and sets `PYTHONPATH="/home/${USERNAME}/app:${PYTHONPATH}"`. Make sure to use the root of the repository as the docker build context so it has access to copy `src/`.
 
 ### Step 2: Define Schemas & Clients in `src/`
 1. Create a schema file under `src/types/yolov8.py` containing Pydantic models for request and response formats.
