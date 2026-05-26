@@ -1,0 +1,8 @@
+sensor_msgs/Image image
+---
+bool success
+string error_message
+float32[] embeddings
+int32[] shape
+int32 h_patches
+int32 w_patches

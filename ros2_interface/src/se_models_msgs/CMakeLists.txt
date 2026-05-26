@@ -15,6 +15,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Segmentation.msg"
   "srv/GetDetections.srv"
   "srv/GetSegmentation.srv"
+  "srv/GetEmbeddings.srv"
   DEPENDENCIES sensor_msgs
 )
 

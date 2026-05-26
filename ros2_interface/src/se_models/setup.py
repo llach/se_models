@@ -24,7 +24,8 @@ setup(
     entry_points={
         'console_scripts': [
             'grounding_dino_node = se_models_ros.grounding_dino_node:main',
-            'sam2_node = se_models_ros.sam2_node:main'
+            'sam2_node = se_models_ros.sam2_node:main',
+            'dinov3_node = se_models_ros.dinov3_node:main'
         ],
     },
 )

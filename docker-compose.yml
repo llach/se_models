@@ -34,3 +34,20 @@ services:
     volumes:
       - ./weights:/home/user/app/weights
     privileged: true
+
+  dinov3:
+    build:
+      context: .
+      dockerfile: models/dinov3/Dockerfile
+      args:
+        USERNAME: ${DOCKER_USER:-user}
+        UID: ${DOCKER_UID:-1000}
+        GID: ${DOCKER_GID:-1000}
+    image: dinov3:latest
+    container_name: dinov3
+    runtime: nvidia
+    ports:
+      - "${DINOV3_PORT:-8002}:8080"
+    volumes:
+      - ./weights:/home/user/app/weights
+    privileged: true
