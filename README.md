@@ -116,23 +116,84 @@ python _test/test_sam2.py
 
 ## 3. Using it With ROS 2
 
-### Prerequisites
-Make sure ROS 2 (e.g. Humble) is installed and sourced in your current terminal shell.
+You can run the ROS 2 workspace either inside a dedicated ROS 2 Development Docker Container or directly on your host machine (if ROS 2 is installed locally).
 
-### Building the ROS 2 Workspace
+### Option A: Using the Docker Development Container (Recommended)
+
+This utilizes the custom ROS 2 development environment defined in `ros2_interface/Dockerfile`.
+
+#### 1. Managing Multiple Docker Compose Files
+You have two options to manage the model servers and the ROS 2 container:
+* **Independent Stacks (Recommended)**: Run the model servers and the ROS 2 dev container separately. Since the ROS 2 container uses `network_mode: host`, it can seamlessly communicate with the FastAPI servers running on localhost ports `8000`/`8001`:
+  ```bash
+  # Terminal 1: Spin up model servers
+  docker compose up -d
+
+  # Terminal 2: Spin up ROS 2 development container
+  docker compose -f docker-compose.ros2.yml up -d
+  ```
+* **Combined Stack**: Run both compose files together using the `-f` flag to manage them as a single group:
+  ```bash
+  # Spin up models and ROS 2 container together
+  docker compose -f docker-compose.yml -f docker-compose.ros2.yml up -d
+  ```
+
+#### 2. Start and Enter the Container
+To start the ROS 2 development container and launch an interactive shell:
+```bash
+# Start the container in the background
+docker compose -f docker-compose.ros2.yml up -d
+
+# Open an interactive shell inside the container as the 'ros' user
+docker exec -it ros2_dev bash
+```
+
+#### 3. Opening Additional Shell Sessions
+If you need to open multiple terminal windows inside the same running container (e.g., to run multiple launch files or CLI commands in parallel), execute this command in a new host terminal window:
+```bash
+docker exec -it ros2_dev bash
+```
+
+#### 4. Building the Workspace Inside the Container
+Once inside the container shell:
+```bash
+# Navigate to the workspace (mounted to /home/ros/projects)
+cd /home/ros/projects
+
+# Build the workspace
+colcon build --symlink-install
+
+# Source the setup script (use setup.bash inside Docker)
+source install/setup.bash
+```
+
+#### 5. Launching All Nodes
+Within one of your container shell sessions:
+```bash
+ros2 launch se_models models.launch.py
+```
+
+---
+
+### Option B: Local Host Workspace (ROS 2 Installed on Host)
+
+#### Prerequisites
+Make sure ROS 2 (e.g. Humble) is installed and sourced in your current host shell.
+
+#### Building the ROS 2 Workspace
 ```bash
 cd ros2_interface
 colcon build --symlink-install
 source install/setup.zsh
 ```
 
-### Launching All Nodes
-To start the ROS 2 services for all models:
+#### Launching All Nodes
 ```bash
 # Launch grounding_dino_node and sam2_node
 ros2 launch se_models models.launch.py
 ```
 This launcher reads the `.env` file ports at runtime to connect to the active FastAPI servers.
+
 
 ### Calling ROS 2 Services
 You can interact with the running nodes via the command line:

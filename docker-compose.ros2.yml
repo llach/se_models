@@ -1,0 +1,20 @@
+services:
+  ros2_dev:
+    build:
+      context: .
+      dockerfile: ros2_interface/Dockerfile
+      args:
+        ROS_DISTRO: ${ROS_DISTRO:-humble}
+    container_name: ros2_dev
+    image: ros2_dev:latest
+    user: ros
+    volumes:
+      - ${ROS2_PROJECTS_DIR:-~/repos}:/home/ros/projects
+    network_mode: host
+    ipc: host
+    tty: true
+    stdin_open: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    privileged: true
