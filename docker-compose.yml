@@ -11,18 +11,12 @@ services:
         GID: ${DOCKER_GID:-1000}
     image: grounding_dino:latest
     container_name: grounding_dino
+    runtime: nvidia
     ports:
       - "${GROUNDING_DINO_PORT:-8000}:8080"
     volumes:
       - ./weights:/home/user/app/weights
     privileged: true
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
 
   sam2:
     build:
@@ -34,15 +28,9 @@ services:
         GID: ${DOCKER_GID:-1000}
     image: sam2:latest
     container_name: sam2
+    runtime: nvidia
     ports:
       - "${SAM2_PORT:-8001}:8080"
     volumes:
       - ./weights:/home/user/app/weights
     privileged: true
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
