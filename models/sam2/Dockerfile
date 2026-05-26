@@ -1,5 +1,4 @@
-ARG BASE_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
-FROM ${BASE_IMAGE}
+FROM pytorch/pytorch:2.3.1-cuda12.1-cudnn8-runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
@@ -16,10 +15,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy uv for fast dependency installation
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
-ARG CPU_ONLY=0
 ARG USERNAME=user
 ARG UID=1000
 ARG GID=1000
@@ -31,27 +26,15 @@ RUN groupadd -g ${GID} -o ${USERNAME} && \
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}/app
 
-# Create virtual environment and activate it by adding to PATH
-RUN uv venv /home/${USERNAME}/venv
-ENV PATH="/home/${USERNAME}/venv/bin:/usr/local/cuda/bin:${PATH}"
-ENV PYTHONPATH="/home/${USERNAME}/app:${PYTHONPATH}"
-
-# Install python dependencies based on CPU_ONLY argument using uv
-RUN if [ "$CPU_ONLY" = "1" ] ; then \
-        uv pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu ; \
-    else \
-        uv pip install --no-cache-dir torch torchvision torchaudio ; \
-    fi && \
-    uv pip install --no-cache-dir "setuptools<82" wheel
-
-# Clone SAM2 and install using uv
+# Clone SAM2 and install
 ENV CUDA_HOME=/usr/local/cuda
 RUN git clone --depth 1 https://github.com/facebookresearch/segment-anything-2.git && \
     cd segment-anything-2 && \
-    uv pip install --no-cache-dir --no-build-isolation .
+    pip install --no-cache-dir --no-build-isolation .
 
-# Install FastAPI and other reqs using uv
-RUN uv pip install --no-cache-dir fastapi uvicorn pydantic python-multipart opencv-python-headless
+# Install FastAPI and other reqs 
+ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"
+RUN pip install --no-cache-dir fastapi uvicorn pydantic python-multipart opencv-python-headless
 
 # Create empty weights directory as placeholder/mountpoint
 RUN mkdir -p /home/${USERNAME}/app/weights
