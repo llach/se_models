@@ -1,5 +1,5 @@
 import requests
-from src.types.sam2 import SegmentationResponse
+from se_models.types.sam2 import BoundingBox, SegmentationResult, SegmentationResponse
 
 class Sam2Client:
     def __init__(self, api_url: str = "http://localhost:8001"):

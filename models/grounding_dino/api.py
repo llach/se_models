@@ -11,7 +11,7 @@ from groundingdino.util.inference import load_model, predict
 import groundingdino.datasets.transforms as T
 
 # Import Pydantic schemas from shared src package
-from src.types.grounding_dino import BoundingBox, DetectionResult, DetectionResponse
+from se_models.types.grounding_dino import BoundingBox, DetectionResult, DetectionResponse
 
 app = FastAPI(title="GroundingDINO API")
 

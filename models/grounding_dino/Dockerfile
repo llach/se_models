@@ -44,7 +44,7 @@ RUN python -c "import groundingdino._C"
 RUN mkdir -p /home/${USERNAME}/app/weights
 
 # Copy code
-COPY --chown=${USERNAME}:${GID} src/ /home/${USERNAME}/app/src/
+COPY --chown=${USERNAME}:${GID} se_models/ /home/${USERNAME}/app/se_models/
 COPY --chown=${USERNAME}:${GID} models/grounding_dino/api.py /home/${USERNAME}/app/api.py
 
 EXPOSE 8080

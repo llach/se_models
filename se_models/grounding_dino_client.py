@@ -1,5 +1,5 @@
 import requests
-from src.types.grounding_dino import DetectionResponse
+from se_models.types.grounding_dino import DetectionResponse
 
 class GroundingDinoClient:
     def __init__(self, api_url: str = "http://localhost:8000"):

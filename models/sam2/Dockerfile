@@ -32,7 +32,7 @@ RUN pip install --no-cache-dir fastapi uvicorn pydantic python-multipart opencv-
 
 RUN mkdir -p /home/${USERNAME}/app/weights
 
-COPY --chown=${USERNAME}:${GID} src/ /home/${USERNAME}/app/src/
+COPY --chown=${USERNAME}:${GID} se_models/ /home/${USERNAME}/app/se_models/
 COPY --chown=${USERNAME}:${GID} models/sam2/api.py /home/${USERNAME}/app/api.py
 
 EXPOSE 8080

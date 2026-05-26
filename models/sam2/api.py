@@ -14,7 +14,7 @@ from sam2.sam2_image_predictor import SAM2ImagePredictor
 from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 
 # Import Pydantic schemas from shared src package
-from src.types.sam2 import BoundingBox, SegmentationResult, SegmentationResponse
+from se_models.types.sam2 import BoundingBox, SegmentationResult, SegmentationResponse
 
 app = FastAPI(title="SAM2 API")
 
@@ -84,6 +84,7 @@ async def predict_endpoint(
         return SegmentationResponse(results=results)
         
     except Exception as e:
+        print(f"Exception: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/health")

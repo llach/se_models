@@ -5,11 +5,15 @@ services:
       dockerfile: ros2_interface/Dockerfile
       args:
         ROS_DISTRO: ${ROS_DISTRO:-humble}
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
     container_name: ros2_dev
     image: ros2_dev:latest
     user: ros
     volumes:
       - ${ROS2_PROJECTS_DIR:-~/repos}:/home/ros/projects
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ~/.Xauthority:/home/ros/.Xauthority:ro
     network_mode: host
     ipc: host
     tty: true
@@ -17,4 +21,5 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
+      - XAUTHORITY=/home/ros/.Xauthority
     privileged: true

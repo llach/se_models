@@ -7,7 +7,7 @@ package_name = 'se_models'
 setup(
     name=package_name,
     version='0.0.0',
-    packages=find_packages(exclude=['test']),
+    packages=['se_models_ros'],
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
@@ -23,8 +23,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'grounding_dino_node = se_models.grounding_dino_node:main',
-            'sam2_node = se_models.sam2_node:main'
+            'grounding_dino_node = se_models_ros.grounding_dino_node:main',
+            'sam2_node = se_models_ros.sam2_node:main'
         ],
     },
 )

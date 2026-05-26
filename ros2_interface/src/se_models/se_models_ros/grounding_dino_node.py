@@ -8,7 +8,7 @@ import time
 from se_models_msgs.srv import GetDetections
 from se_models_msgs.msg import Detection, BoundingBox
 
-from src.grounding_dino_client import GroundingDinoClient
+from se_models.grounding_dino_client import GroundingDinoClient
 
 class GroundingDinoNode(Node):
     def __init__(self):
@@ -20,12 +20,14 @@ class GroundingDinoNode(Node):
         self.bridge = CvBridge()
         
         self.get_logger().info(f'Connecting to GroundingDINO API at {api_url}...')
-        try:
-            self.client = GroundingDinoClient(api_url)
-            self.get_logger().info('Successfully connected and verified GroundingDINO API health.')
-        except Exception as e:
-            self.get_logger().error(f'Failed to connect to GroundingDINO API: {e}')
-            self.client = None
+        while rclpy.ok():
+            try:
+                self.client = GroundingDinoClient(api_url)
+                self.get_logger().info('Successfully connected and verified GroundingDINO API health.')
+                break
+            except Exception as e:
+                self.get_logger().warn(f'Failed to connect to GroundingDINO API: {e}. Retrying in 2 seconds...')
+                time.sleep(2)
         
         self.srv = self.create_service(GetDetections, 'get_detections', self.get_detections_callback)
         self.get_logger().info('GroundingDINO service is ready.')

@@ -21,7 +21,7 @@ if os.path.exists(os.path.join(ROOT_DIR, ".env")):
                 key, val = line.strip().split('=', 1)
                 os.environ[key] = val
 
-from src.sam2_client import Sam2Client
+from se_models.sam2_client import Sam2Client
 
 # ==========================================
 # PARAMETERS

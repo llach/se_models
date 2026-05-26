@@ -139,31 +139,37 @@ You have two options to manage the model servers and the ROS 2 container:
   ```
 
 #### 2. Start and Enter the Container
-To start the ROS 2 development container and launch an interactive shell:
+To start the ROS 2 development container (building it if necessary) with your user's exact UID and GID so that files remain writeable:
 ```bash
 # Start the container in the background
-docker compose -f docker-compose.ros2.yml up -d
+UID=$(id -u) GID=$(id -g) docker compose -f docker-compose.ros2.yml up -d --build
 
 # Open an interactive shell inside the container as the 'ros' user
 docker exec -it ros2_dev bash
 ```
 
-#### 3. Opening Additional Shell Sessions
+#### 3. Install the se_models Package
+Once inside the container shell, install the package in editable mode:
+```bash
+sudo pip install -e /home/ros/projects/se_models
+```
+
+#### 4. Opening Additional Shell Sessions
 If you need to open multiple terminal windows inside the same running container (e.g., to run multiple launch files or CLI commands in parallel), execute this command in a new host terminal window:
 ```bash
 docker exec -it ros2_dev bash
 ```
 
-#### 4. Building the Workspace Inside the Container
+#### 5. Building the Workspace Inside the Container
 Once inside the container shell:
 ```bash
-# Navigate to the workspace (mounted to /home/ros/projects)
-cd /home/ros/projects
+# Navigate to the workspace
+cd /home/ros/ws
 
 # Build the workspace
 colcon build --symlink-install
 
-# Source the setup script (use setup.bash inside Docker)
+# Source the setup script
 source install/setup.bash
 ```
 
