@@ -82,6 +82,7 @@ async def predict_endpoint(
         return DetectionResponse(detections=detections)
         
     except Exception as e:
+        print(f"Exception: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/health")

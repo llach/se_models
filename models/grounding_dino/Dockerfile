@@ -44,6 +44,8 @@ RUN python -m pip install --no-cache-dir "numpy<2" "transformers==4.38.2" fastap
 
 RUN cd GroundingDINO && python -m pip install --no-cache-dir .
 
+RUN python -m pip install --no-cache-dir "numpy<2" "opencv-python<4.10"
+
 RUN python -c "import groundingdino._C"
 
 # Create empty weights directory as placeholder/mountpoint
