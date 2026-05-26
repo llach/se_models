@@ -20,7 +20,7 @@ app = FastAPI(title="SAM2 API")
 
 # Load model weights
 CHECKPOINT = "/home/user/app/weights/sam2.1_hiera_large.pt"
-CONFIG = "/home/user/app/weights/sam2.1_hiera_l.yaml"
+CONFIG = "//home/user/app/weights/sam2.1_hiera_l.yaml"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 print(f"Loading SAM2 on {DEVICE}...")

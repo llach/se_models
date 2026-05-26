@@ -1,68 +1,57 @@
-# Use a build argument to switch between GPU and CPU base images
-ARG BASE_IMAGE=nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
-FROM ${BASE_IMAGE}
+FROM pytorch/pytorch:2.1.2-cuda12.1-cudnn8-runtime
+ARG DEBIAN_FRONTEND=noninteractive
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV PYTHONUNBUFFERED=1
+ENV CUDA_HOME=/usr/local/cuda \
+    TORCH_CUDA_ARCH_LIST="6.0 6.1 7.0 7.5 8.0 8.6+PTX" \
+    SETUPTOOLS_USE_DISTUTILS=stdlib \
+    PATH=/usr/local/cuda/bin:$PATH
 
-# Install minimal system dependencies required for building and running GroundingDINO
+# Combine system dependencies, install Libmamba solver, install CUDA, and clean caches in one layer
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    wget \
-    build-essential \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    python3 \
-    python3-pip \
-    python3-dev \
-    && rm -rf /var/lib/apt/lists/*
+         wget \
+         build-essential \
+         git \
+         python3-opencv \
+         ca-certificates && \
+    rm -rf /var/lib/apt/lists/* && \
+    conda \
+        config --set solver libmamba && \
+    conda \
+        install -y -c "nvidia/label/cuda-12.1.1" cuda && \
+    conda \
+        clean -afy
 
-# Copy uv from the official image for fast dependency installation
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
-ARG CPU_ONLY=0
 ARG USERNAME=user
 ARG UID=1000
 ARG GID=1000
 
-# Create a non-root user with bash shell
+# Create user with bash shell
 RUN groupadd -g ${GID} -o ${USERNAME} && \
     useradd -m -u ${UID} -g ${GID} -o -s /bin/bash ${USERNAME}
 
 USER ${USERNAME}
 WORKDIR /home/${USERNAME}/app
+ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"
 
-# Create virtual environment and activate it by adding to PATH
-RUN uv venv /home/${USERNAME}/venv
-ENV PATH="/home/${USERNAME}/venv/bin:${PATH}"
-ENV PYTHONPATH="/home/${USERNAME}/app:${PYTHONPATH}"
+# Clone repository in a separate layer to leverage caching if dependencies change
+ENV LD_LIBRARY_PATH=/opt/conda/lib/python3.10/site-packages/torch/lib:$LD_LIBRARY_PATH
+RUN git clone https://github.com/IDEA-Research/GroundingDINO.git
 
-# Install PyTorch using uv based on CPU_ONLY argument
-RUN if [ "$CPU_ONLY" = "1" ] ; then \
-        uv pip install --no-cache-dir "torch==2.1.2" "torchvision==0.16.2" "torchaudio==2.1.2" --index-url https://download.pytorch.org/whl/cpu ; \
-    else \
-        uv pip install --no-cache-dir "torch==2.1.2" "torchvision==0.16.2" "torchaudio==2.1.2" --index-url https://download.pytorch.org/whl/cu118 ; \
-    fi
+# Set CUDA path relative to active Conda env for library compilation
+ENV CUDA_HOME=$CONDA_PREFIX
 
-# Clone and install GroundingDINO
-ENV CUDA_HOME=/usr/local/cuda
-RUN git clone --depth 1 https://github.com/IDEA-Research/GroundingDINO.git
-RUN cd GroundingDINO && \
-    if [ "$CPU_ONLY" = "1" ] ; then export GROUNDINGDINO_BUILD_CUDA=0 ; fi && \
-    uv pip install --no-cache-dir --no-build-isolation -e .
+RUN python -m pip install --no-cache-dir "numpy<2" "transformers==4.38.2" fastapi uvicorn pydantic python-multipart
 
-# Install FastAPI and server dependencies using uv
-RUN uv pip install --no-cache-dir fastapi uvicorn pydantic python-multipart opencv-python-headless "transformers<4.37.0"
+RUN cd GroundingDINO && python -m pip install --no-cache-dir .
+
+RUN python -c "import groundingdino._C"
+
+# Create empty weights directory as placeholder/mountpoint
+RUN mkdir -p /home/${USERNAME}/app/weights
 
 # Copy source/types and server code
 COPY --chown=${USERNAME}:${GID} src/ /home/${USERNAME}/app/src/
 COPY --chown=${USERNAME}:${GID} models/grounding_dino/api.py /home/${USERNAME}/app/api.py
-
-# Download weights
-RUN mkdir -p /home/${USERNAME}/app/weights && \
-    cd /home/${USERNAME}/app/weights && \
-    wget -q https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth && \
-    wget -q https://raw.githubusercontent.com/IDEA-Research/GroundingDINO/main/groundingdino/config/GroundingDINO_SwinT_OGC.py
 
 EXPOSE 8080
 CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8080"]

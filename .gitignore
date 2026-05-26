@@ -1,0 +1,10 @@
+# Ignore python build and runtime files
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.env
+
+# Ignore model checkpoints/weights
+weights/

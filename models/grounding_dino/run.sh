@@ -21,6 +21,7 @@ DOCKER_ARGS="
 --env=DISPLAY=$DISPLAY \
 ${RUNTIME_ARG} \
 --mount source=$HOME/shared,target=/shared,type=bind \
+--volume=${SCRIPT_DIR}/../../weights:/home/user/app/weights \
 --volume=/dev/shm:/dev/shm \
 -p ${PORT}:8080 \
 "

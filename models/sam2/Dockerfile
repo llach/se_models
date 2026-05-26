@@ -33,7 +33,7 @@ WORKDIR /home/${USERNAME}/app
 
 # Create virtual environment and activate it by adding to PATH
 RUN uv venv /home/${USERNAME}/venv
-ENV PATH="/home/${USERNAME}/venv/bin:${PATH}"
+ENV PATH="/home/${USERNAME}/venv/bin:/usr/local/cuda/bin:${PATH}"
 ENV PYTHONPATH="/home/${USERNAME}/app:${PYTHONPATH}"
 
 # Install python dependencies based on CPU_ONLY argument using uv
@@ -41,22 +41,20 @@ RUN if [ "$CPU_ONLY" = "1" ] ; then \
         uv pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu ; \
     else \
         uv pip install --no-cache-dir torch torchvision torchaudio ; \
-    fi
+    fi && \
+    uv pip install --no-cache-dir "setuptools<82" wheel
 
 # Clone SAM2 and install using uv
 ENV CUDA_HOME=/usr/local/cuda
 RUN git clone --depth 1 https://github.com/facebookresearch/segment-anything-2.git && \
     cd segment-anything-2 && \
-    uv pip install --no-cache-dir .
+    uv pip install --no-cache-dir --no-build-isolation .
 
 # Install FastAPI and other reqs using uv
 RUN uv pip install --no-cache-dir fastapi uvicorn pydantic python-multipart opencv-python-headless
 
-# Download weights
-RUN mkdir -p /home/${USERNAME}/app/weights && \
-    cd /home/${USERNAME}/app/weights && \
-    wget -q https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt && \
-    wget -q https://raw.githubusercontent.com/facebookresearch/sam2/refs/heads/main/sam2/configs/sam2.1/sam2.1_hiera_l.yaml
+# Create empty weights directory as placeholder/mountpoint
+RUN mkdir -p /home/${USERNAME}/app/weights
 
 # Copy source/types and server code
 COPY --chown=${USERNAME}:${GID} src/ /home/${USERNAME}/app/src/
