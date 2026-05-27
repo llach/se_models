@@ -2,10 +2,24 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 echo "Sourced ROS 2 ${ROS_DISTRO}"
 
 # Automatically link workspace packages from the mounted volume if they exist and are not already linked
-if [ -d /home/ros/projects/se_models/ros2_interface/src ] && [ ! -L /home/ros/ws/src/se_models ]; then
-  ln -sf /home/ros/projects/se_models/ros2_interface/src/se_models /home/ros/ws/src/se_models
-  ln -sf /home/ros/projects/se_models/ros2_interface/src/se_models_msgs /home/ros/ws/src/se_models_msgs
-fi
+link_if_exists() {
+  local target="$1"
+  local link_name="/home/ros/ws/src/$2"
+  if [ -d "$target" ] && [ ! -L "$link_name" ]; then
+    ln -sf "$target" "$link_name"
+  fi
+}
+
+link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/dual_ur5e_moveit" "dual_ur5e_moveit"
+link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/iri_ur5e_description" "iri_ur5e_description"
+link_if_exists "/home/ros/projects/se_models/ros2_interface/src/se_models" "se_models"
+link_if_exists "/home/ros/projects/se_models/ros2_interface/src/se_models_msgs" "se_models_msgs"
+link_if_exists "/home/ros/projects/softenable-ui/softenable_display" "softenable_display"
+link_if_exists "/home/ros/projects/softenable-ui/softenable_display_msgs" "softenable_display_msgs"
+link_if_exists "/home/ros/projects/stack_detect/src/stack_approach" "stack_approach"
+link_if_exists "/home/ros/projects/stack_detect/src/stack_detect" "stack_detect"
+link_if_exists "/home/ros/projects/stack_detect/src/stack_msgs" "stack_msgs"
+
 
 function s {
   # Source the overlay workspace, if built

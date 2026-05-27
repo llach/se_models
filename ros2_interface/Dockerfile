@@ -32,6 +32,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-${ROS_DISTRO}-desktop \
     ros-${ROS_DISTRO}-moveit \
+    ros-${ROS_DISTRO}-ur \
     ros-${ROS_DISTRO}-diagnostic-updater \
     python3-colcon-common-extensions \
     python3-rosdep \
@@ -47,6 +48,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglfw3-dev \
     libglu1-mesa-dev \
     freeglut3-dev \
+    nodejs \
+    libportaudio2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Initialize rosdep (run as root)
@@ -86,6 +89,9 @@ RUN mkdir -p /home/ros/ws/src && \
     cd /home/ros/ws && \
     . /opt/ros/${ROS_DISTRO}/setup.sh && \
     colcon build --symlink-install
+
+
+RUN pip install sounddevice requests dynamixel-sdk ur_rtde
 
 # Copy functions.sh and configure auto-sourcing in .bashrc
 COPY --chown=ros:ros ros2_interface/functions.sh /home/ros/.functions.sh
