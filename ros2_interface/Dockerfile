@@ -97,5 +97,11 @@ RUN pip install sounddevice requests dynamixel-sdk ur_rtde
 COPY --chown=ros:ros ros2_interface/functions.sh /home/ros/.functions.sh
 RUN echo "source /home/ros/.functions.sh" >> /home/ros/.bashrc
 
+# Download Piper voice models (both .onnx and .onnx.json) to the ros user's home directory
+RUN curl -L https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_ES/davefx/medium/es_ES-davefx-medium.onnx -o /home/ros/es_ES-davefx-medium.onnx \
+    && curl -L https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_ES/davefx/medium/es_ES-davefx-medium.onnx.json -o /home/ros/es_ES-davefx-medium.onnx.json \
+    && curl -L https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/high/en_US-lessac-high.onnx -o /home/ros/en_US-lessac-high.onnx \
+    && curl -L https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/high/en_US-lessac-high.onnx.json -o /home/ros/en_US-lessac-high.onnx.json
+
 # Default entry point
 CMD ["/bin/bash"]
