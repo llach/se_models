@@ -28,10 +28,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu jammy main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null \
     && rm -rf /var/lib/apt/lists/*
 
-# Install ROS 2, MoveIt, and development tools
+# Install ROS 2, MoveIt, build tools, and development/compilation dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-${ROS_DISTRO}-desktop \
     ros-${ROS_DISTRO}-moveit \
+    ros-${ROS_DISTRO}-diagnostic-updater \
     python3-colcon-common-extensions \
     python3-rosdep \
     python3-vcstool \
@@ -39,10 +40,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     build-essential \
     sudo \
+    libssl-dev \
+    libusb-1.0-0-dev \
+    pkg-config \
+    libgtk-3-dev \
+    libglfw3-dev \
+    libglu1-mesa-dev \
+    freeglut3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Initialize rosdep (run as root)
 RUN rosdep init
+
+# Clone, build, and install librealsense v2.54.2 with RSUSB (libusb) backend
+# (This allows L515 support and bypasses host kernel/udev restrictions inside Docker)
+RUN git clone --depth 1 -b v2.54.2 https://github.com/IntelRealSense/librealsense.git /tmp/librealsense \
+    && cd /tmp/librealsense \
+    && mkdir build && cd build \
+    && cmake .. \
+       -DCMAKE_BUILD_TYPE=Release \
+       -DFORCE_RSUSB_BACKEND=true \
+       -DBUILD_WITH_CUDA=false \
+    && make -j$(nproc) \
+    && make install \
+    && rm -rf /tmp/librealsense
 
 # Create the non-root 'ros' user with sudo privileges matching GID/UID
 ARG UID=1000
@@ -58,12 +79,13 @@ WORKDIR /home/ros/ws
 # Initialize rosdep for the user
 RUN rosdep update
 
-# Create the colcon workspace under ~/ws and build it once to generate setup.bash
+# Clone the realsense-ros wrapper v4.54.1 (matching librealsense v2.54.2 for L515 support)
+# and build the colcon workspace
 RUN mkdir -p /home/ros/ws/src && \
+    git clone --depth 1 -b 4.54.1 https://github.com/IntelRealSense/realsense-ros.git /home/ros/ws/src/realsense-ros && \
     cd /home/ros/ws && \
     . /opt/ros/${ROS_DISTRO}/setup.sh && \
-    colcon build
-
+    colcon build --symlink-install
 
 # Copy functions.sh and configure auto-sourcing in .bashrc
 COPY --chown=ros:ros ros2_interface/functions.sh /home/ros/.functions.sh

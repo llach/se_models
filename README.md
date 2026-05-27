@@ -143,6 +143,7 @@ To start the ROS 2 development container (building it if necessary) with your us
 ```bash
 # Start the container in the background
 UID=$(id -u) GID=$(id -g) docker compose -f docker-compose.ros2.yml up -d --build
+UID=$(id -u) GID=$(id -g) ROS2_PROJECTS_DIR=~/projects docker compose -f docker-compose.ros2.yml up -d --build
 
 # Open an interactive shell inside the container as the 'ros' user
 docker exec -it ros2_dev bash

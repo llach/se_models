@@ -10,10 +10,15 @@ services:
     container_name: ros2_dev
     image: ros2_dev:latest
     user: ros
+    group_add:
+      - video
+      - plugdev
     volumes:
       - ${ROS2_PROJECTS_DIR:-~/repos}:/home/ros/projects
       - /tmp/.X11-unix:/tmp/.X11-unix:ro
       - ~/.Xauthority:/home/ros/.Xauthority:ro
+      - /dev:/dev
+      - /run/udev:/run/udev:ro
     network_mode: host
     ipc: host
     tty: true
