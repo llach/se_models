@@ -91,7 +91,7 @@ RUN mkdir -p /home/ros/ws/src && \
     colcon build --symlink-install
 
 
-RUN pip install sounddevice requests dynamixel-sdk ur_rtde
+RUN pip install sounddevice requests dynamixel-sdk ur_rtde piper-tts
 
 # Copy functions.sh and configure auto-sourcing in .bashrc
 COPY --chown=ros:ros ros2_interface/functions.sh /home/ros/.functions.sh
