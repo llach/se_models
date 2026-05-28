@@ -12,6 +12,8 @@ link_if_exists() {
 
 link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/dual_ur5e_moveit" "dual_ur5e_moveit"
 link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/iri_ur5e_description" "iri_ur5e_description"
+link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/gown_grasping" "gown_grasping"
+link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/gown_opening" "gown_opening"
 link_if_exists "/home/ros/projects/se_models/ros2_interface/src/se_models" "se_models"
 link_if_exists "/home/ros/projects/se_models/ros2_interface/src/se_models_msgs" "se_models_msgs"
 link_if_exists "/home/ros/projects/softenable-ui/softenable_display" "softenable_display"
