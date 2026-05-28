@@ -10,18 +10,26 @@ link_if_exists() {
   fi
 }
 
+# IRI deps
 link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/dual_ur5e_moveit" "dual_ur5e_moveit"
 link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/iri_ur5e_description" "iri_ur5e_description"
+
+# Gown Projects
 link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/gown_grasping" "gown_grasping"
 link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/gown_opening" "gown_opening"
+
+# Stack Detect
+link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/stack_detect/src/stack_approach" "stack_approach"
+link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/stack_detect/src/stack_detect" "stack_detect"
+link_if_exists "/home/ros/projects/se_clinic_case/ros_modules/stack_detect/src/stack_msgs" "stack_msgs"
+
+# SE Models
 link_if_exists "/home/ros/projects/se_models/ros2_interface/src/se_models" "se_models"
 link_if_exists "/home/ros/projects/se_models/ros2_interface/src/se_models_msgs" "se_models_msgs"
+
+# SE Dsplay
 link_if_exists "/home/ros/projects/softenable-ui/softenable_display" "softenable_display"
 link_if_exists "/home/ros/projects/softenable-ui/softenable_display_msgs" "softenable_display_msgs"
-link_if_exists "/home/ros/projects/stack_detect/src/stack_approach" "stack_approach"
-link_if_exists "/home/ros/projects/stack_detect/src/stack_detect" "stack_detect"
-link_if_exists "/home/ros/projects/stack_detect/src/stack_msgs" "stack_msgs"
-
 
 function s {
   # Source the overlay workspace, if built
