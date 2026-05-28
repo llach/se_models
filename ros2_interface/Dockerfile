@@ -62,7 +62,7 @@ RUN git clone --depth 1 -b v2.54.2 https://github.com/IntelRealSense/librealsens
     && mkdir build && cd build \
     && cmake .. \
        -DCMAKE_BUILD_TYPE=Release \
-       -DFORCE_RSUSB_BACKEND=true \
+       -DFORCE_RSUSB_BACKEND=false \
        -DBUILD_WITH_CUDA=false \
     && make -j$(nproc) \
     && make install \
